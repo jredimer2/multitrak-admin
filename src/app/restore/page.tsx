@@ -25,6 +25,7 @@ export default function RestorePage() {
       setBackups(list);
       setSelected(list[0] || "");
       setStatus(null);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       setStatus(err.message || "Error fetching backups");
     }

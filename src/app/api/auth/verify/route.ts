@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
   const pending = await getVerificationCode(email);
   // Reject if code mismatch or expired by TTL if present
   const nowSec = Math.floor(Date.now() / 1000);
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const expired = typeof (pending as any)?.ttl === "number" && (pending as any).ttl < nowSec;
   if (!pending || pending.code !== code || expired) {
     return new Response(JSON.stringify({ error: "Invalid code" }), { status: 401 });

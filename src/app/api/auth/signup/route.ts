@@ -4,7 +4,7 @@ import { putVerificationCode } from "@/lib/dal";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
-  const { email, password } = body || {};
+  const { email } = body || {};
   if (typeof email !== "string" || !email.includes("@")) {
     return new Response(JSON.stringify({ error: "Invalid email" }), { status: 400 });
   }

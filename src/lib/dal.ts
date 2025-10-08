@@ -1,10 +1,5 @@
 import { ddbDoc } from "@/lib/aws";
-import {
-  PutCommand,
-  GetCommand,
-  DeleteCommand,
-  QueryCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { PutCommand, GetCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 
 const ADMIN_TABLE = process.env.DDB_ADMIN_TABLE || "AdminUsers";
 const VERIFY_TABLE = process.env.DDB_VERIFY_TABLE || "VerificationCodes";
@@ -31,6 +26,7 @@ export async function deleteVerificationCode(email: string) {
   await ddbDoc.send(new DeleteCommand({ TableName: VERIFY_TABLE, Key: { email } }));
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export async function putAdminUser(email: string, fields: Record<string, any>) {
   await ddbDoc.send(
     new PutCommand({ TableName: ADMIN_TABLE, Item: { email, ...fields } })

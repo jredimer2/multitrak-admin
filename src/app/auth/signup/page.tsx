@@ -30,6 +30,7 @@ export default function SignupPage() {
         return;
       }
       router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       setError(err.message || "Network error while sending code.");
       setStatus(null);
