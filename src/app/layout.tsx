@@ -29,13 +29,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <header className="border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+        <header className="border-b bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
             <Link href="/auth/login" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="EzyTask logo" width={28} height={28} />
-              <span className="text-sm font-semibold tracking-wide">EzyTask Admin</span>
+              <Image src="/logo.png" alt="EzyTask logo" width={128} height={28} />
             </Link>
-            <nav className="ml-auto flex items-center gap-3 text-sm">
+            <nav className="ml-auto flex items-center gap-3 text-sm text-white/90 font-bold">
               <Link className="hover:underline" href="/auth/login">Login</Link>
               <Link className="hover:underline" href="/auth/signup">Sign Up</Link>
             </nav>
