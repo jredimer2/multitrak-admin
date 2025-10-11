@@ -20,19 +20,9 @@ export default function VerifyContent() {
   const [error, setError] = useState<string | null>(null);
 
   const resend = async () => {
-    setStatus("Resending verification code...");
+    setStatus(null);
     setError(null);
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: emailParam }),
-    });
-    if (res.ok) {
-      setStatus("Verification code resent to admin@ezytask.io");
-    } else {
-      setError("Failed to resend verification code");
-      setStatus(null);
-    }
+    router.push(`/auth/signup?email=${encodeURIComponent(emailParam)}`);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -46,7 +36,7 @@ export default function VerifyContent() {
     });
     const data = await res.json();
     if (res.ok) {
-      setStatus("Verified successfully! You can now access the admin panel.");
+    setStatus("Verified successfully! You can now access the admin panel.");
     } else {
       setError(data.error || "Verification failed. Please check your code and try again.");
       setStatus(null);
@@ -69,6 +59,9 @@ export default function VerifyContent() {
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
           ⚠ {error}
+          <div className="mt-2 text-sm">
+            Your code may be expired. You can resend a new code or go back to signup to start over.
+          </div>
         </div>
       )}
 
@@ -91,14 +84,12 @@ export default function VerifyContent() {
       </form>
 
       <div className="mt-4 flex justify-between items-center">
-        <button
-          className="text-blue-600 hover:underline text-sm"
-          onClick={resend}
-        >
-          Resend code
-        </button>
+        <button className="text-blue-600 hover:underline text-sm" onClick={resend}>Resend code</button>
         <Link href="/auth/login" className="text-gray-600 hover:underline text-sm">
           Back to login
+        </Link>
+        <Link href="/auth/signup" className="text-blue-600 hover:underline text-sm">
+          Start over
         </Link>
       </div>
 

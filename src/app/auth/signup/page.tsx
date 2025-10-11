@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("");
+  const params = useSearchParams();
+  const initialEmail = params.get("email") || "";
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +58,8 @@ export default function SignupPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          minLength={8}
+          required
         />
         <button className="bg-black text-white rounded px-4 py-2 disabled:opacity-50" type="submit" disabled={loading}>
           Send Verification

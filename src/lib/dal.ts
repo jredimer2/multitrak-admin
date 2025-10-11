@@ -5,12 +5,12 @@ const ADMIN_TABLE = process.env.DDB_ADMIN_TABLE || "AdminUsers";
 const VERIFY_TABLE = process.env.DDB_VERIFY_TABLE || "VerificationCodes";
 const RESTORE_TABLE = process.env.DDB_RESTORE_TABLE || "RestoreAttempts";
 
-export async function putVerificationCode(email: string, code: string, ttlSeconds: number) {
+export async function putVerificationCode(email: string, code: string, ttlSeconds: number, password?: { salt: string; hash: string }) {
   const ttl = Math.floor(Date.now() / 1000) + ttlSeconds;
   await ddbDoc.send(
     new PutCommand({
       TableName: VERIFY_TABLE,
-      Item: { email, code, created_at: Date.now(), ttl },
+      Item: { email, code, created_at: Date.now(), ttl, password },
     })
   );
 }
@@ -19,7 +19,7 @@ export async function getVerificationCode(email: string) {
   const res = await ddbDoc.send(
     new GetCommand({ TableName: VERIFY_TABLE, Key: { email } })
   );
-  return (res.Item as { email: string; code: string } | undefined) || undefined;
+  return (res.Item as { email: string; code: string; password?: { salt: string; hash: string }; ttl?: number } | undefined) || undefined;
 }
 
 export async function deleteVerificationCode(email: string) {
@@ -31,6 +31,11 @@ export async function putAdminUser(email: string, fields: Record<string, any>) {
   await ddbDoc.send(
     new PutCommand({ TableName: ADMIN_TABLE, Item: { email, ...fields } })
   );
+}
+
+export async function getAdminUser(email: string) {
+  const res = await ddbDoc.send(new GetCommand({ TableName: ADMIN_TABLE, Key: { email } }));
+  return (res.Item as { email: string; verified?: boolean; password?: { salt: string; hash: string } } | undefined) || undefined;
 }
 
 export async function logRestoreAttempt(item: {

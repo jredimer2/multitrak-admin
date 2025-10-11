@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { verifySession } from "@/lib/session";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,11 +21,14 @@ export const metadata: Metadata = {
   description: "Administrative panel for EzyTask",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jar = await cookies();
+  const token = jar.get("session")?.value || null;
+  const session = verifySession(token);
   return (
     <html lang="en">
       <body
@@ -35,8 +40,20 @@ export default function RootLayout({
               <Image src="/logo.png" alt="EzyTask logo" width={128} height={28} />
             </Link>
             <nav className="ml-auto flex items-center gap-3 text-sm text-white/90 font-bold">
-              <Link className="hover:underline" href="/auth/login">Login</Link>
-              <Link className="hover:underline" href="/auth/signup">Sign Up</Link>
+              {!session && (
+                <>
+                  <Link className="hover:underline" href="/auth/login">Login</Link>
+                  <Link className="hover:underline" href="/auth/signup">Sign Up</Link>
+                </>
+              )}
+              {session && (
+                <>
+                  <span className="px-2 py-1 rounded bg-white/10">{session.email}</span>
+                  <form action="/api/auth/logout" method="POST">
+                    <button className="hover:underline" type="submit">Logout</button>
+                  </form>
+                </>
+              )}
             </nav>
           </div>
         </header>

@@ -16,6 +16,6 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Invalid code" }), { status: 401 });
   }
   await deleteVerificationCode(email);
-  await putAdminUser(email, { verified: true, verified_at: Date.now() });
+  await putAdminUser(email, { verified: true, verified_at: Date.now(), password: pending.password });
   return new Response(JSON.stringify({ ok: true }), { status: 200 });
 }
