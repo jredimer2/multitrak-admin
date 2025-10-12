@@ -1,15 +1,25 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
+  const params = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const msg = params.get("msg");
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/iam/check");
+      // If user can call IAM check and has cookie, just let middleware handle.
+      // No-op; rely on middleware redirect.
+    })();
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +40,12 @@ export default function LoginPage() {
         return;
       }
       setStatus("Signed in!");
+      // Refresh server components (header) so menu updates immediately
+      router.refresh();
+      // Notify client header to re-fetch session without full reload
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth-change"));
+      }
       router.push("/restore");
     /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
@@ -41,6 +57,11 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto p-6 rounded-lg border bg-white/80">
+      {msg === "please_sign_in" && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded">
+          Please sign in to continue.
+        </div>
+      )}
       <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
       <p className="text-sm text-gray-600 mb-4">Sign in to EzyTask Admin</p>
       <form className="space-y-3" onSubmit={onSubmit}>

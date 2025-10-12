@@ -36,7 +36,14 @@ export default function VerifyContent() {
     });
     const data = await res.json();
     if (res.ok) {
-    setStatus("Verified successfully! You can now access the admin panel.");
+      setStatus("Verified successfully! Redirecting...");
+      // Refresh server components (header) so menu updates immediately
+      router.refresh();
+      // Notify client header to re-fetch session without full reload
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth-change"));
+      }
+      router.push("/admin");
     } else {
       setError(data.error || "Verification failed. Please check your code and try again.");
       setStatus(null);

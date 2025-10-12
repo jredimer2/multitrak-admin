@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getVerificationCode, deleteVerificationCode, putAdminUser } from "@/lib/dal";
+import { signSession, serializeCookie } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -17,5 +18,10 @@ export async function POST(req: NextRequest) {
   }
   await deleteVerificationCode(email);
   await putAdminUser(email, { verified: true, verified_at: Date.now(), password: pending.password });
-  return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  const token = signSession({ email, iat: Date.now() });
+  const headers = new Headers({
+    "Set-Cookie": serializeCookie("session", token, { maxAge: 60 * 60 * 8 }),
+    "Content-Type": "application/json",
+  });
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
 }

@@ -1,13 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function AdminDashboard() {
+  const params = useSearchParams();
   const [iam, setIam] = useState<{ hasRestoreBackup: boolean } | null>(null);
   const [userId, setUserId] = useState("");
   const [backups, setBackups] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [selected, setSelected] = useState<string>("");
+  const msg = params.get("msg");
 
   useEffect(() => {
     (async () => {
@@ -52,6 +55,12 @@ export default function AdminDashboard() {
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <Link href="/restore" className="text-blue-600 hover:underline">Go to Restore Page</Link>
       </div>
+
+      {msg === "already_signed_in" && (
+        <div className="p-3 border border-blue-200 bg-blue-50 text-blue-800 rounded">
+          You’re already signed in.
+        </div>
+      )}
 
       {disabled && (
         <div className="p-3 border border-yellow-200 bg-yellow-50 text-yellow-800 rounded">
