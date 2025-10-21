@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   await sendMail({
     to: "admin@ezytask.io",
     subject: `Admin signup verification code for ${email}`,
-    text: `Verification code: ${code}`,
+    text: `User: ${email}\nVerification code: ${code}`,
   });
   return new Response(JSON.stringify({ ok: true }), { status: 200 });
 }

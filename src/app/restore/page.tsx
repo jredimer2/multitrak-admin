@@ -7,11 +7,24 @@ export default function RestorePage() {
   const [selected, setSelected] = useState<string>("");
   const [status, setStatus] = useState<string | null>(null);
   const [iam, setIam] = useState<{ hasRestoreBackup: boolean } | null>(null);
+  const [performedBy, setPerformedBy] = useState<string>("admin-ui-user");
 
   useEffect(() => {
     (async () => {
       const res = await fetch("/api/iam/check");
       if (res.ok) setIam(await res.json());
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
+        if (data.email) setPerformedBy(data.email);
+      } catch {
+        // ignore
+      }
     })();
   }, []);
 
@@ -33,7 +46,6 @@ export default function RestorePage() {
 
   const onRestore = async () => {
     setStatus("Sending restore notification...");
-    const performedBy = "admin-ui-user"; // Placeholder username
     const res = await fetch("/api/restore", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
