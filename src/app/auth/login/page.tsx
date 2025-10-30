@@ -59,7 +59,7 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("auth-change"));
       }
-      router.push("/restore");
+      router.push("/admin");
       /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       setError(err.message || "Network error");

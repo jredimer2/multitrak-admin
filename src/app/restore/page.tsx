@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 
 export default function RestorePage() {
   const [userId, setUserId] = useState("");
-  const [backups, setBackups] = useState<string[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const [dates, setDates] = useState<string[]>([]);
+  const [files, setFiles] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<string>("");
   const [status, setStatus] = useState<string | null>(null);
   const [iam, setIam] = useState<{ hasRestoreBackup: boolean } | null>(null);
   const [performedBy, setPerformedBy] = useState<string>("admin-ui-user");
@@ -29,14 +31,15 @@ export default function RestorePage() {
   }, []);
 
   const onPopulate = async () => {
-    setStatus("Fetching backups...");
+    setStatus("Fetching backup dates...");
     try {
-      const res = await fetch(`/api/backups?userId=${encodeURIComponent(userId)}`);
+      const res = await fetch(`/api/backups`, { cache: "no-store" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load backups");
-      const list = data.files as string[];
-      setBackups(list);
-      setSelected(list[0] || "");
+      const list = (data.dates as string[]) || [];
+      setDates(list);
+      const first = list[0] || "";
+      setSelectedDate(first);
       setStatus(null);
     /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
@@ -44,12 +47,36 @@ export default function RestorePage() {
     }
   };
 
+  // When a date is selected, load JSON files under that date folder
+  useEffect(() => {
+    (async () => {
+      if (!selectedDate) {
+        setFiles([]);
+        setSelectedFile("");
+        return;
+      }
+      setStatus(`Loading files for ${selectedDate}...`);
+      try {
+        const res = await fetch(`/api/backups?date=${encodeURIComponent(selectedDate)}`, { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load files");
+        const list = (data.files as string[]) || [];
+        setFiles(list);
+        setSelectedFile(list[0] || "");
+        setStatus(null);
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      } catch (err: any) {
+        setStatus(err.message || "Error loading files");
+      }
+    })();
+  }, [selectedDate]);
+
   const onRestore = async () => {
     setStatus("Sending restore notification...");
     const res = await fetch("/api/restore", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, filename: selected, performedBy }),
+      body: JSON.stringify({ userId, filename: selectedFile, performedBy }),
     });
     const data = await res.json();
     setStatus(res.ok ? "Notification sent" : data.error || "Failed");
@@ -77,27 +104,44 @@ export default function RestorePage() {
           Populate Backups
         </button>
       </div>
-      {backups.length > 0 && (
+      {dates.length > 0 && (
         <div className="space-y-2">
-          <label className="block text-sm">Select Backup</label>
+          <label className="block text-sm">Select Date</label>
           <select
             className="w-full border rounded p-2"
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
           >
-            {backups.map((b) => (
-              <option key={b} value={b}>
-                {b}
+            {dates.map((d) => (
+              <option key={d} value={d}>
+                {d}
               </option>
             ))}
           </select>
-          <button
-            className="bg-blue-600 text-white rounded px-4 py-2"
-            onClick={onRestore}
-            disabled={!selected || !userId || disabled}
-          >
-            Restore
-          </button>
+
+          {files.length > 0 && (
+            <>
+              <label className="block text-sm">Select Backup File</label>
+              <select
+                className="w-full border rounded p-2"
+                value={selectedFile}
+                onChange={(e) => setSelectedFile(e.target.value)}
+              >
+                {files.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="bg-blue-600 text-white rounded px-4 py-2"
+                onClick={onRestore}
+                disabled={!selectedFile || !userId || disabled}
+              >
+                Restore
+              </button>
+            </>
+          )}
         </div>
       )}
       {status && <p className="text-sm">{status}</p>}

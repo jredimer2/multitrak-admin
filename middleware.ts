@@ -37,5 +37,13 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth/:path*", "/admin/:path*", "/restore/:path*"],
+  // Ensure root paths AND subpaths are matched
+  matcher: [
+    "/auth",
+    "/auth/:path*",
+    "/admin",
+    "/admin/:path*",
+    "/restore",
+    "/restore/:path*",
+  ],
 };
