@@ -8,6 +8,28 @@ export default function AdminDashboard() {
   const [status, setStatus] = useState<string | null>(null);
   const msg = params.get("msg");
 
+  const formatDateLabel = (mmddyyyy: string) => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const m = Number(mmddyyyy.slice(0, 2));
+    const d = mmddyyyy.slice(3, 5);
+    const y = mmddyyyy.slice(6, 10);
+    if (!m || m < 1 || m > 12) return mmddyyyy;
+    return `${months[m - 1]}-${d}-${y}`;
+  };
+
   // Populate last 30 days backups from staging on load
   useEffect(() => {
     (async () => {
@@ -63,7 +85,7 @@ export default function AdminDashboard() {
               {dates.map((date, idx) => (
                 <tr key={date} className="border-t">
                   <td className="px-3 py-2">{idx + 1}</td>
-                  <td className="px-3 py-2">{date}</td>
+                  <td className="px-3 py-2">{formatDateLabel(date)}</td>
                   <td className="px-3 py-2">
                     <button
                       className="bg-black text-white rounded px-3 py-1"
