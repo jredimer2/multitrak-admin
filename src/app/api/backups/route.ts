@@ -32,9 +32,11 @@ export async function GET(req: NextRequest) {
   const res = await s3Client.send(
     new ListObjectsV2Command({ Bucket: bucket, Prefix: basePrefix, Delimiter: "/", MaxKeys: 1000 })
   );
-  console.log(res, "----sdsd---")
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dayMs = 24 * 60 * 60 * 1000;
+  // Inclusive 30 calendar days window: today and previous 29 days
+  const cutoff = new Date(startOfToday.getTime() - 29 * dayMs);
 
   const toDate = (mmddyyyy: string) => {
     const m = Number(mmddyyyy.slice(0, 2));
@@ -48,13 +50,14 @@ export async function GET(req: NextRequest) {
     .map((p) => (p.Prefix || "").replace(basePrefix, "").replace(/\/$/, ""))
     // Keep only MM-DD-YYYY
     .filter((name) => /^(\d{2})-(\d{2})-(\d{4})$/.test(name))
-    // Filter by last 30 days
+    // Filter by last 30 calendar days (inclusive)
     .filter((name) => {
       const dt = toDate(name);
-      return dt >= cutoff && dt <= now;
+      return dt >= cutoff && dt <= startOfToday;
     })
     // Sort newest first
     .sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
-   console.log(dates, "-------")
-  return new Response(JSON.stringify({ dates }), { status: 200 });
+  // Return up to 30 entries in case there are more folders in the window
+  const limited = dates.slice(0, 30);
+  return new Response(JSON.stringify({ dates: limited }), { status: 200 });
 }
