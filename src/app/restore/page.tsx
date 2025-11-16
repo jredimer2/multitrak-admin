@@ -11,6 +11,28 @@ export default function RestorePage() {
   const [iam, setIam] = useState<{ hasRestoreBackup: boolean } | null>(null);
   const [performedBy, setPerformedBy] = useState<string>("admin-ui-user");
 
+  const formatDateLabel = (mmddyyyy: string) => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const m = Number(mmddyyyy.slice(0, 2));
+    const d = mmddyyyy.slice(3, 5);
+    const y = mmddyyyy.slice(6, 10);
+    if (!m || m < 1 || m > 12) return mmddyyyy;
+    return `${months[m - 1]}-${d}-${y}`;
+  };
+
   useEffect(() => {
     (async () => {
       const res = await fetch("/api/iam/check");
@@ -114,7 +136,7 @@ export default function RestorePage() {
           >
             {dates.map((d) => (
               <option key={d} value={d}>
-                {d}
+                {formatDateLabel(d)}
               </option>
             ))}
           </select>
